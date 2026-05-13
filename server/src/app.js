@@ -19,7 +19,12 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-    origin: ENV.CLIENT_URL, credentials: true, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    origin: [
+        'http://localhost:3000',
+        'https://317am.vercel.app',
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(morgan('dev'));
