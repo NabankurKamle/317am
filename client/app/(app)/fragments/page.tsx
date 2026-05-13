@@ -119,7 +119,7 @@ function FragmentModal({
                     {/* Footer */}
                     <div className="px-6 py-4 border-t border-white/5 flex-shrink-0">
                         <p className="text-white/15 text-xs text-center">
-                            tap outside or press Esc to close
+                            press Esc to close
                         </p>
                     </div>
                 </div>
