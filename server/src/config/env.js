@@ -6,4 +6,5 @@ export const ENV = {
     CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
     COOKIE_NAME: process.env.COOKIE_NAME || '317am_session',
     COOKIE_MAX_AGE: 7 * 24 * 60 * 60 * 1000,
+    NODE_ENV: process.env.NODE_ENV || 'development',
 };
