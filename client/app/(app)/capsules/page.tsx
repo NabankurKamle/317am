@@ -129,7 +129,7 @@ function CapsuleCard({
                 <div className="mt-auto flex items-center justify-between pt-2 border-t border-white/5">
                     <span className="text-white/20 text-[11px]">{unlockLabel}</span>
 
-                    <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         {/* Open */}
                         {isUnlocked && (
                             <button

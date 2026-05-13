@@ -175,7 +175,7 @@ function FragmentCard({
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-2 border-t border-white/5">
                     <span className="text-white/25 text-[11px]">{date}</span>
-                    <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button
                             onClick={() => onOpen(fragment)}
                             className="text-[11px] text-white/25 hover:text-white/55 transition-colors"

@@ -17,20 +17,23 @@ export function AppShell({ children, topBarTitle, topBarSubtitle }: AppShellProp
     const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-night-900 flex">
-            {/* Atmosphere */}
+        <div className="h-screen overflow-hidden bg-night-900 flex">
+
+            {/* Atmosphere layers — fixed, always behind everything */}
             <StarField />
             <AmbientGlow />
             <GrainOverlay />
 
-            {/* Sidebar — manages its own desktop/mobile rendering */}
+            {/* Sidebar */}
             <Sidebar
                 mobileOpen={mobileOpen}
                 onClose={() => setMobileOpen(false)}
             />
 
-            {/* Main content */}
-            <div className="flex-1 flex flex-col relative z-10 lg:ml-56 min-w-0">
+            {/* Right column: TopBar + scrollable content */}
+            <div className="lg:ml-56 flex-1 flex flex-col relative z-10 min-w-0 h-screen">
+
+                {/* TopBar — never scrolls because its parent is h-screen flex col */}
                 <TopBar
                     title={topBarTitle}
                     subtitle={topBarSubtitle}
@@ -38,14 +41,16 @@ export function AppShell({ children, topBarTitle, topBarSubtitle }: AppShellProp
                     menuOpen={mobileOpen}
                 />
 
+                {/* Main — the ONLY thing that scrolls */}
                 <motion.main
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto"
+                    className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 min-h-0"
                 >
                     {children}
                 </motion.main>
+
             </div>
         </div>
     );
