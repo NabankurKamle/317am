@@ -13,21 +13,29 @@ import userRoutes from './modules/users/user.routes.js';
 import fragmentRoutes from './modules/fragments/fragment.routes.js';
 import echoRoutes from './modules/echoes/echo.routes.js';
 import atmosphereRoutes from './modules/atmosphere/atmosphere.routes.js';
-import capsuleRoutes from './modules/capsules/capsule.routes.js';    // ← new
+import capsuleRoutes from './modules/capsules/capsule.routes.js';
 
 const app = express();
 
-app.use(helmet());
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    ENV.CLIENT_URL,
+].filter(Boolean);
+
 app.use(cors({
-    origin: [
-        'http://localhost:3000',
-        'https://317am.vercel.app',
-    ],
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(morgan('dev'));
+
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
+app.use(morgan(ENV.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -39,8 +47,12 @@ app.use('/api/echoes', echoRoutes);
 app.use('/api/atmosphere', atmosphereRoutes);
 app.use('/api/capsules', capsuleRoutes);
 
+app.get('/health', (req, res) => res.json({ status: 'awake', env: ENV.NODE_ENV }));
+
 app.use(errorMiddleware);
 
 connectDB().then(() => {
-    app.listen(ENV.PORT, () => console.log(`✨ Server running on port ${ENV.PORT}`));
+    app.listen(ENV.PORT, () =>
+        console.log(`✨ Server running on port ${ENV.PORT} [${ENV.NODE_ENV}]`)
+    );
 });
