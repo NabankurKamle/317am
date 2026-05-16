@@ -1,26 +1,50 @@
+import { DateTime } from 'luxon';
 import { Capsule } from './capsule.model.js';
-import { scheduleCapsuleUnlock, cancelCapsuleUnlock } from '../../jobs/definitions/capsuleUnlock.job.js';
+import {
+    scheduleCapsuleUnlock,
+    cancelCapsuleUnlock,
+} from '../../jobs/definitions/capsuleUnlock.job.js';
 
-export const getUserCapsules = async (userId) => {
-    await Capsule.updateMany(
-        { user: userId, unlockAt: { $lte: new Date() }, isUnlocked: false },
-        { $set: { isUnlocked: true } }
-    );
-    return Capsule.find({ user: userId }).sort({ createdAt: -1 });
+const toUTCMidnight = (dateStr, timezone) => {
+    const tz = timezone || 'UTC';
+    const dt = DateTime.fromISO(`${dateStr}T00:00:00`, { zone: tz });
+
+    if (!dt.isValid) {
+        throw Object.assign(
+            new Error(`Invalid date or timezone: ${dateStr} / ${tz}`),
+            { status: 400 }
+        );
+    }
+
+    return dt.toJSDate();
 };
 
+// ── Service methods ───────────────────────────────────────────────────────────
+
+export const getUserCapsules = (userId) =>
+    Capsule.find({ user: userId }).sort({ createdAt: -1 });
+
 export const createCapsule = async (userId, data) => {
+    const unlockAtUTC = toUTCMidnight(data.unlockAt, data.timezone);
+
+    if (unlockAtUTC <= new Date()) {
+        throw Object.assign(
+            new Error('Unlock date must be in the future.'),
+            { status: 400 }
+        );
+    }
+
     const capsule = await Capsule.create({
         user: userId,
         title: data.title,
         content: data.content,
-        unlockAt: new Date(data.unlockAt),
+        unlockAt: unlockAtUTC,
+        timezone: data.timezone || 'UTC',
         mood: data.mood,
         song: data.song,
         isUnlocked: false,
     });
 
-    // Schedule unlock email at the exact unlockAt date
     await scheduleCapsuleUnlock(capsule);
 
     return capsule;
@@ -46,7 +70,6 @@ export const deleteCapsule = async (id, userId) => {
     const result = await Capsule.findOneAndDelete({ _id: id, user: userId });
     if (!result) throw Object.assign(new Error('Capsule not found.'), { status: 404 });
 
-    // Cancel the scheduled email when the capsule is deleted
     await cancelCapsuleUnlock(id);
 
     return result;

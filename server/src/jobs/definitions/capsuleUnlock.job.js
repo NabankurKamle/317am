@@ -21,7 +21,10 @@ agenda.define(CAPSULE_UNLOCK_JOB, async (job) => {
             return;
         }
 
-        await Capsule.findByIdAndUpdate(capsuleId, { $set: { isUnlocked: true } });
+        await Capsule.findByIdAndUpdate(capsuleId, {
+            $set: { isUnlocked: true },
+        });
+        console.log(`🔓 Capsule ${capsuleId} unlocked`);
 
         await sendCapsuleUnlockEmail({
             to: user.email,
@@ -30,29 +33,32 @@ agenda.define(CAPSULE_UNLOCK_JOB, async (job) => {
             capsuleContent: capsule.content,
             capsuleId: capsule._id,
         });
+        console.log(`📬 Unlock email sent to ${user.email} for capsule ${capsuleId}`);
 
-        console.log(`📬 Unlock email sent for capsule ${capsuleId} to ${user.email}`);
+    } catch (err) {
+        console.error(`❌ capsule:unlock job failed for ${capsuleId}:`, err.message);
+        throw err;
 
     } finally {
-        // ── Self-delete after job completes (success or handled failure) ──────────
-        // In v6, cancel by matching the job's own data — cleaner than job.remove()
         await agenda.cancel({
             name: CAPSULE_UNLOCK_JOB,
             'data.capsuleId': capsuleId,
         });
-        console.log(`🗑  Job self-removed for capsule ${capsuleId}`);
+        console.log(`🗑  Job removed for capsule ${capsuleId}`);
     }
 });
 
+// ── Schedule at exact UTC unlock time ─────────────────────────────────────────
 export const scheduleCapsuleUnlock = async (capsule) => {
     await agenda.schedule(
-        new Date(capsule.unlockAt),
+        capsule.unlockAt,
         CAPSULE_UNLOCK_JOB,
         { capsuleId: capsule._id.toString() }
     );
-    console.log(`🗓  Unlock scheduled for capsule ${capsule._id} at ${capsule.unlockAt}`);
+    console.log(`🗓  Unlock job scheduled: capsule ${capsule._id} at ${capsule.unlockAt.toISOString()}`);
 };
 
+// ── Cancel on capsule delete ──────────────────────────────────────────────────
 export const cancelCapsuleUnlock = async (capsuleId) => {
     const removed = await agenda.cancel({
         name: CAPSULE_UNLOCK_JOB,

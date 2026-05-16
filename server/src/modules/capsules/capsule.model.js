@@ -21,6 +21,10 @@ const capsuleSchema = new mongoose.Schema({
         type: Date,
         required: [true, 'Unlock date is required.'],
     },
+    timezone: {
+        type: String,
+        default: 'UTC',
+    },
     isUnlocked: {
         type: Boolean,
         default: false,
@@ -34,19 +38,5 @@ const capsuleSchema = new mongoose.Schema({
         maxlength: 200,
     },
 }, { timestamps: true });
-
-// Virtual — auto-compute unlock status without storing redundantly
-capsuleSchema.virtual('canOpen').get(function () {
-    return new Date() >= this.unlockAt;
-});
-
-// Auto-unlock when fetched if date has passed
-capsuleSchema.pre('find', function () {
-    // Update unlocked status in background (non-blocking)
-    this.model.updateMany(
-        { unlockAt: { $lte: new Date() }, isUnlocked: false },
-        { $set: { isUnlocked: true } }
-    ).catch(() => { });
-});
 
 export const Capsule = mongoose.model('Capsule', capsuleSchema);
