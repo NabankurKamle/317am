@@ -9,7 +9,7 @@ export const ENV = {
     NODE_ENV: process.env.NODE_ENV || 'development',
 
     EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || 'smtp',
-    EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@317am.app',
+    EMAIL_FROM: process.env.EMAIL_FROM || '317am.archive@gmail.com',
     EMAIL_USER: process.env.EMAIL_USER,
     EMAIL_PASS: process.env.EMAIL_PASS,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
