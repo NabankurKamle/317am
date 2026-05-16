@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { NeonButton } from '@/components/ui/NeonButton';
 import { useMood } from '@/providers/MoodProvider';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { MOODS, type MoodKey } from '@/config/moods';

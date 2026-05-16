@@ -12,6 +12,7 @@ const createTransport = () => {
                     user: ENV.EMAIL_USER,
                     pass: ENV.EMAIL_PASS,       // must be a Gmail App Password
                 },
+                family: 4
             });
 
         case 'resend':
