@@ -7,7 +7,9 @@ const createTransport = () => {
 
         case 'gmail':
             return nodemailer.createTransport({
-                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
                 auth: {
                     user: ENV.EMAIL_USER,
                     pass: ENV.EMAIL_PASS,       // must be a Gmail App Password
