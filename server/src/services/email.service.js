@@ -1,7 +1,33 @@
-import { createTransporter } from '../config/email.js';
+import MailComposer from 'nodemailer/lib/mail-composer/index.js';
+import { gmail } from '../config/email.js';
 import { ENV } from '../config/env.js';
 
-// ── Base template (unchanged from before) ────────────────────────────────────
+// ── Helper: build raw base64url MIME message ──────────────────────────────────
+const buildRawMessage = (mailOptions) =>
+  new Promise((resolve, reject) => {
+    const mail = new MailComposer(mailOptions);
+    mail.compile().build((err, message) => {
+      if (err) return reject(err);
+      const raw = Buffer.from(message)
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+      resolve(raw);
+    });
+  });
+
+// ── Helper: send via Gmail REST API (HTTPS port 443 — never blocked) ──────────
+const sendViaGmailAPI = async (mailOptions) => {
+  const raw = await buildRawMessage(mailOptions);
+  const res = await gmail.users.messages.send({
+    userId: 'me',
+    requestBody: { raw },
+  });
+  return res.data;
+};
+
+// ── Base HTML template ────────────────────────────────────────────────────────
 const baseTemplate = ({ title, preheader, body, cta, ctaUrl }) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -51,7 +77,7 @@ const baseTemplate = ({ title, preheader, body, cta, ctaUrl }) => `
 </body>
 </html>`;
 
-// ── Capsule unlock ────────────────────────────────────────────────────────────
+// ── Capsule unlock email ───────────────────────────────────────────────────────
 export const sendCapsuleUnlockEmail = async ({
   to, username, capsuleTitle, capsuleContent,
 }) => {
@@ -59,10 +85,7 @@ export const sendCapsuleUnlockEmail = async ({
     ? capsuleContent.slice(0, 200).trimEnd() + '…'
     : capsuleContent;
 
-  // Fresh transporter on every send — access token always valid
-  const transporter = await createTransporter();
-
-  return transporter.sendMail({
+  return sendViaGmailAPI({
     from: `"3:17 AM" <${ENV.EMAIL_FROM}>`,
     to,
     subject: `Your capsule opened — "${capsuleTitle || 'A message from your past'}"`,
@@ -70,12 +93,8 @@ export const sendCapsuleUnlockEmail = async ({
       title: 'Your time capsule has opened.',
       preheader: `"${capsuleTitle || 'A message from your past'}" is ready to read.`,
       body: `
-        <p style="margin:0 0 16px;color:rgba(245,243,255,0.6);font-size:15px;line-height:1.7;">
-          Hey ${username},
-        </p>
-        <p style="margin:0 0 24px;color:rgba(245,243,255,0.6);font-size:15px;line-height:1.7;">
-          A message you sealed for yourself is now open.
-        </p>
+        <p style="margin:0 0 16px;color:rgba(245,243,255,0.6);font-size:15px;line-height:1.7;">Hey ${username},</p>
+        <p style="margin:0 0 24px;color:rgba(245,243,255,0.6);font-size:15px;line-height:1.7;">A message you sealed for yourself is now open.</p>
         <div style="background:rgba(125,211,252,0.06);border:1px solid rgba(125,211,252,0.2);border-radius:14px;padding:20px 24px;margin-bottom:24px;">
           <p style="margin:0 0 8px;color:rgba(125,211,252,0.7);font-size:11px;letter-spacing:0.3em;text-transform:uppercase;">⟁ Unsealed</p>
           <p style="margin:0 0 12px;color:rgba(245,243,255,0.8);font-size:18px;font-weight:400;">${capsuleTitle || 'Unnamed Capsule'}</p>
@@ -90,11 +109,9 @@ export const sendCapsuleUnlockEmail = async ({
   });
 };
 
-// ── Welcome ───────────────────────────────────────────────────────────────────
+// ── Welcome email ─────────────────────────────────────────────────────────────
 export const sendWelcomeEmail = async ({ to, username }) => {
-  const transporter = await createTransporter();
-
-  return transporter.sendMail({
+  return sendViaGmailAPI({
     from: `"3:17 AM" <${ENV.EMAIL_FROM}>`,
     to,
     subject: 'Your archive is ready.',
