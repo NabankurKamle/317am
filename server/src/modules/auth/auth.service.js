@@ -11,9 +11,9 @@ export const registerUser = async ({ username, email, password }) => {
         throw Object.assign(new Error('All fields are required.'), { status: 400 });
     }
 
-    const exists = await User.findOne({ email: email.toLowerCase().trim() });
+    const exists = await User.findOne({ $or: [{ email: email.toLowerCase().trim() }, { username: username.trim() },] });
     if (exists) {
-        throw Object.assign(new Error('Email already in use.'), { status: 409 });
+        throw Object.assign(new Error('Email or username already in use.'), { status: 409 });
     }
 
     const user = await User.create({ username: username.trim(), email: email.toLowerCase().trim(), password });
