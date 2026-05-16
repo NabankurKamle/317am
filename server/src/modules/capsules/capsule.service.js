@@ -1,17 +1,16 @@
 import { Capsule } from './capsule.model.js';
+import { scheduleCapsuleUnlock, cancelCapsuleUnlock } from '../../jobs/definitions/capsuleUnlock.job.js';
 
 export const getUserCapsules = async (userId) => {
-    // Auto-unlock any that have passed while we fetch
     await Capsule.updateMany(
         { user: userId, unlockAt: { $lte: new Date() }, isUnlocked: false },
         { $set: { isUnlocked: true } }
     );
-
     return Capsule.find({ user: userId }).sort({ createdAt: -1 });
 };
 
-export const createCapsule = (userId, data) => {
-    return Capsule.create({
+export const createCapsule = async (userId, data) => {
+    const capsule = await Capsule.create({
         user: userId,
         title: data.title,
         content: data.content,
@@ -20,6 +19,11 @@ export const createCapsule = (userId, data) => {
         song: data.song,
         isUnlocked: false,
     });
+
+    // Schedule unlock email at the exact unlockAt date
+    await scheduleCapsuleUnlock(capsule);
+
+    return capsule;
 };
 
 export const getCapsuleById = async (id, userId) => {
@@ -41,6 +45,10 @@ export const updateCapsule = async (id, userId, data) => {
 export const deleteCapsule = async (id, userId) => {
     const result = await Capsule.findOneAndDelete({ _id: id, user: userId });
     if (!result) throw Object.assign(new Error('Capsule not found.'), { status: 404 });
+
+    // Cancel the scheduled email when the capsule is deleted
+    await cancelCapsuleUnlock(id);
+
     return result;
 };
 

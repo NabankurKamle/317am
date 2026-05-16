@@ -1,13 +1,13 @@
 'use client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { StarField } from '@/components/atmosphere/StarField';
+import { NightCanvas } from '@/components/atmosphere/NightCanvas';
 import { NeonButton } from '@/components/ui/NeonButton';
 
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen flex items-center justify-center overflow-hidden bg-night-900">
-      <StarField />
+      <NightCanvas />
       {/* Ambient glow blobs */}
       <div className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full bg-glow-violet/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-glow-pink/8 blur-[100px] pointer-events-none" />

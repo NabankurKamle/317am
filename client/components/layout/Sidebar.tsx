@@ -8,6 +8,7 @@ import { useMood } from '@/providers/MoodProvider';
 import { authService } from '@/services/auth.service';
 import { MOODS } from '@/config/moods';
 import { toast } from 'sonner';
+import { BackgroundPicker } from '@/components/atmosphere/BackgroundPicker';
 
 const NAV = [
     { href: '/tonight', label: 'Tonight', icon: '🌙', desc: 'your space' },
@@ -161,9 +162,12 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
             {/* Divider */}
             <div
-                className="mx-2 my-4 h-px"
+                className="mx-2 my-3 h-px"
                 style={{ background: `linear-gradient(90deg, transparent, ${current.glow}25, transparent)` }}
             />
+
+            {/* Background picker */}
+            <BackgroundPicker />
 
             {/* Logout */}
             <motion.button
@@ -172,18 +176,17 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 whileHover={{ x: 2 }}
                 whileTap={{ scale: 0.97 }}
                 className="
-          group flex items-center gap-3 px-3 py-2.5 rounded-xl mx-0
+          group flex items-center gap-3 px-3 py-2.5 rounded-xl
           text-white/25 hover:text-pink-400/70
           hover:bg-pink-500/6 border border-transparent
           hover:border-pink-500/15
-          transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed
-          w-full text-left
+          transition-all duration-200 disabled:opacity-40 w-full text-left
         "
             >
                 <span className="text-base pl-1 transition-all duration-200 group-hover:scale-110">
-                    {loggingOut ? (
-                        <span className="inline-block w-4 h-4 border border-pink-400/40 border-t-pink-400/80 rounded-full animate-spin" />
-                    ) : '↪'}
+                    {loggingOut
+                        ? <span className="inline-block w-4 h-4 border border-pink-400/40 border-t-pink-400/80 rounded-full animate-spin" />
+                        : '↪'}
                 </span>
                 <div>
                     <p className="text-sm">{loggingOut ? 'Leaving...' : 'Leave the Night'}</p>

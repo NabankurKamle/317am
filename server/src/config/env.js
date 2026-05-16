@@ -7,4 +7,14 @@ export const ENV = {
     COOKIE_NAME: process.env.COOKIE_NAME || '317am_session',
     COOKIE_MAX_AGE: 7 * 24 * 60 * 60 * 1000,
     NODE_ENV: process.env.NODE_ENV || 'development',
+
+    EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || 'smtp',
+    EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@317am.app',
+    EMAIL_USER: process.env.EMAIL_USER,
+    EMAIL_PASS: process.env.EMAIL_PASS,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT || '587',
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASS: process.env.SMTP_PASS,
 };

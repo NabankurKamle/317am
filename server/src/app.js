@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import { connectDB } from './config/db.js';
 import { ENV } from './config/env.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
+import { startScheduler } from './jobs/index.js';
 
 import authRoutes from './modules/auth/auth.routes.js';
 import userRoutes from './modules/users/user.routes.js';
@@ -50,7 +51,8 @@ app.get('/health', (req, res) => res.json({ status: 'awake', env: ENV.NODE_ENV }
 
 app.use(errorMiddleware);
 
-connectDB().then(() => {
+connectDB().then(async () => {
+    await startScheduler();
     app.listen(ENV.PORT, () =>
         console.log(`✨ Server running on port ${ENV.PORT} [${ENV.NODE_ENV}]`)
     );
