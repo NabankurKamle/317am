@@ -26,7 +26,7 @@ function CapsuleCard({
 
     const now = Date.now();
     const unlockTime = new Date(capsule.unlockAt).getTime();
-    const isUnlocked = now >= unlockTime;
+    const isUnlocked = capsule.isUnlocked;
     const daysLeft = Math.ceil((unlockTime - now) / 86400000);
     const unlockLabel = new Date(capsule.unlockAt).toLocaleDateString('en-US', {
         year: 'numeric', month: 'long', day: 'numeric',
@@ -409,8 +409,9 @@ export default function CapsulesPage() {
         }
     };
 
-    const sealed = capsules.filter(c => new Date(c.unlockAt).getTime() > Date.now());
-    const unlocked = capsules.filter(c => new Date(c.unlockAt).getTime() <= Date.now());
+    const sealed = capsules.filter(c => !c.isUnlocked);
+    const unlocked = capsules.filter(c => c.isUnlocked);
+
 
     return (
         <AppShell>
